@@ -312,7 +312,6 @@ public class Automate {
 		Automate automate0p = new Automate(arr0,false, arrP, "2 - vue en cours + proba");
 		Automate automateR = new Automate(arr0,true, arrNull, "3 - random initialisation (regles d'automate 0 vue en cpurs)");
 
-		//Automate automate0i = new Automate(arr0i, false, false,"0i - simples");
 		Automate automateC = new Automate(arrC, false, arrNull,"4 - ressemble au motif de la coquillage");
 		Automate automateCr = new Automate(arrC, true, arrNull,"5 - ressemble au motif de la coquillage + random");
 
