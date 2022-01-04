@@ -11,9 +11,6 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import java.util.Arrays;
-import java.util.concurrent.ThreadLocalRandom;
-
 public class Automate {
 	
 	//Largeur des cellules (nombre impair)
@@ -31,39 +28,26 @@ public class Automate {
 	private JFrame fenetre;
 	//JPanel pour afficher l'automate
 	private JPanel_Automate jpanel_automate;
-	//JButton pour faire �voluer l'automate d'un pas
+	//JButton pour faire évoluer l'automate d'un pas
 	private JButton evolution_automate;
-	//JButton pour lancer compl�tement l'automate
+	//JButton pour lancer complétement l'automate
 	private JButton realisation_automate;
-
-	private int[] regles = new int[8];
-
-	private Boolean random = false;
-
-	private double[] proba = new double[8];
-	private Boolean probaB = false;
 	
 	
 	/**
 	 * Constructeur de l'automate
+	 * initialisation_aleatoire : booléen qui indique si on veut faire une initialisaiton
+	 * de la première ligne aléatoire.
 	 */
-	public Automate(int[] regles_m, Boolean random_m, double[] proba_m, String nom) {
-		Arrays.fill(regles, 0);
-		if(regles_m.length > 0 ) {
-			System.arraycopy(regles_m, 0, regles, 0, 8);
-		}
-		Arrays.fill(proba, 1.);
-		if(proba_m.length > 0) {
-			System.arraycopy(proba_m, 0, proba, 0, 8);
-			probaB = true;
-		}
-
-		random = random_m;
+	public Automate(boolean initialisation_aleatoire) {
 		//Initialisation des cellules
 		cellules = new int[TAILLE_HAUTEUR][TAILLE_LARGEUR];
+		//Cellule du milieu de la première ligne initialisé à 0
+		cellules[0][TAILLE_LARGEUR/2] = 1;
 		
-		if(random) {
-			//Cellules de la premi�re ligne initialisé en maniere aléatoire
+		//Génération de la première ligne aléatoire si indiqué
+		if(initialisation_aleatoire) {
+			//Cellules de la première ligne initialisé de maniere aléatoire
 			Boolean one = false;
 			for(int l = 0; l < TAILLE_LARGEUR; l++){
 				int nbr = (int)(Math.random()*2);
@@ -74,69 +58,64 @@ public class Automate {
 			if(!one)
 				cellules[0][(int)(Math.random()*TAILLE_LARGEUR)] = 1;
 		} else {
-			//Cellule du milieu de la premi�re ligne initialis� � 0
+			//Cellule du milieu de la première ligne initialisé à 0
 			cellules[0][TAILLE_LARGEUR/2] = 1;
 		}
 		
-		
-		//Initialisation ligne courante (on commence � la deuxi�me ligne)
+		//Initialisation ligne courante (on commence à la deuxième ligne)
 		ligne_courante = 1;
 		
-		//Cr�ation affichage de l'automate
-		creer_affichage(nom);
-	}
-
-	private int valProba(int id){
-		return (ThreadLocalRandom.current().nextDouble(0, 1) <= proba[id]) ? 1 : 0;
+		//Création affichage de l'automate
+		creer_affichage();
 	}
 	
 	
 	/**
-	 * M�thode qui permet de trouver la valeur d'une cellule en fonction des r�gle d�fini.
-	 * Par exemple : si on a une r�gle qui dit que la cellule vaut 1 si les 3 cases au dessus
-	 * valent 1 => on r�cup�re les valeurs des 3 cases au dessus, on regarde si elle respecte
-	 * la r�gle et si oui on applique la r�gle.
+	 * Méthode qui permet de trouver la valeur d'une cellule en fonction des règle défini.
+	 * Par exemple : si on a une règle qui dit que la cellule vaut 1 si les 3 cases au dessus
+	 * valent 1 => on récupère les valeurs des 3 cases au dessus, on regarde si elle respecte
+	 * la règle et si oui on applique la règle.
 	 * @param ligne de la cellule que l'on souhaite traiter
 	 * @param colonne de la cellule que l'on souhaite traiter
-	 * @return 0 ou 1 en fonction des r�gles
+	 * @return 0 ou 1 en fonction des règles
 	 */
 	private int calcul_cellule(int ligne, int colonne) {
 		//Valeur de la cellule (de base 0)
 		int val = 0;
 		
-		//R�gle pour les 3 cellules au dessus (voisinage sup�rieur)
+		//Règle pour les 3 cellules au dessus (voisinage supérieur)
 		int x = cellules[ligne - 1][colonne - 1];
 		int y = cellules[ligne - 1][colonne];
 		int z = cellules[ligne - 1][colonne + 1];
 		
-		//Voisinage sup�rieur (repr�sentation du voisinage par une cha�ne)
+		//Voisinage supérieur (représentation du voisinage par une chaîne)
 		String voisinage = String.valueOf(x) + String.valueOf(y) + String.valueOf(z);
 		
-		//R�gles
+		//Règles
 		switch(voisinage) {
 		case "000":
-			val = (!probaB) ? regles[7] : valProba(7);
+			val = 0;
 			break;
 		case "001":
-			val = (!probaB) ? regles[6] : valProba(6);
+			val = 1;
 			break;
 		case "010":
-			val = (!probaB) ? regles[5] : valProba(5);
+			val = 1;
 			break;
 		case "011":
-			val = (!probaB) ? regles[4] : valProba(4);
+			val = 1;
 			break;
 		case "100":
-			val = (!probaB) ? regles[3] : valProba(3);
+			val = 1;
 			break;
 		case "101":
-			val = (!probaB) ? regles[2] : valProba(2);
+			val = 0;
 			break;
 		case "110":
-			val = (!probaB) ? regles[1] : valProba(1);
+			val = 0;
 			break;
 		case "111":
-			val = (!probaB) ? regles[0] : valProba(0);
+			val = 0;
 			break;
 		}
 		
@@ -146,9 +125,9 @@ public class Automate {
 	
 	
 	/**
-	 * M�thode qui permet de r�aliser l'automate en entier
-	 * R�aliser l'automate revient � ex�cuter une �tape un nombre de fois
-	 * �quivalent au nombre de ligne
+	 * Méthode qui permet de réaliser l'automate en entier
+	 * Réaliser l'automate revient à exécuter une étape un nombre de fois
+	 * équivalent au nombre de ligne
 	 */
 	private void realisation_automate() {
 		//On traite chaque ligne
@@ -159,11 +138,11 @@ public class Automate {
 	
 	
 	/**
-	 * M�thode qui permet de faire �voluer l'automate d'une �tape
+	 * Méthode qui permet de faire évoluer l'automate d'une étape
 	 * On traite ici seulement une ligne
 	 */
 	private void evoluer_automate() {		
-		//On traite chaque cellule de la ligne (on commence � la deuxi�me colonne et on fini � l'avant derni�re pour �viter les probl�mes)
+		//On traite chaque cellule de la ligne (on commence à la deuxième colonne et on fini à l'avant dernière pour éviter les problèmes)
 		for (int x=1; x < TAILLE_LARGEUR - 1; x++) {
 			//Calcul de la valeur de la cellule
 			cellules[ligne_courante][x] = calcul_cellule(ligne_courante, x);
@@ -181,12 +160,12 @@ public class Automate {
 	
 	
 	/**
-	 * M�thode qui cr�e l'affichage de l'automate
+	 * Méthode qui crée l'affichage de l'automate
 	 */
-	private void creer_affichage(String nom) {
+	private void creer_affichage() {
 		//Initialisation affichage de l'automate
-		fenetre = new JFrame("Automate "+nom);
-		//Param�tres fen�tre
+		fenetre = new JFrame("Automate");
+		//Paramètres fenêtre
 		fenetre.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		fenetre.setVisible(true);
 		fenetre.setResizable(false);
@@ -204,7 +183,7 @@ public class Automate {
         gbc.gridy = 0;
         fenetre.add(jpanel_automate, gbc);
         
-        //Bouton d'�volution
+        //Bouton d'évolution
         evolution_automate = new JButton("Evolution automate");
         gbc.gridwidth = 1;
         gbc.weightx = 0.5;
@@ -215,10 +194,10 @@ public class Automate {
         //Action du bouton
         evolution_automate.addActionListener(new ActionListener() {
 
-        	//Faire �voluer le syst�me
+        	//Faire évoluer le système
 			public void actionPerformed(ActionEvent e) {
 				evoluer_automate();
-				//Si on d�passe le nombre de ligne de l'automate
+				//Si on dépasse le nombre de ligne de l'automate
 				if (!(ligne_courante < TAILLE_HAUTEUR)) {
 					evolution_automate.setEnabled(false);
 					realisation_automate.setEnabled(false);
@@ -228,7 +207,7 @@ public class Automate {
 			
         });
         
-        //Bouton de r�alisation
+        //Bouton de réalisation
         realisation_automate = new JButton("Finir automate");
         gbc.gridwidth = 1;
         gbc.weightx = 0.5;
@@ -239,7 +218,7 @@ public class Automate {
         //Action du bouton
         realisation_automate.addActionListener(new ActionListener() {
 
-        	//Faire �voluer le syst�me
+        	//Faire évoluer le système
 			public void actionPerformed(ActionEvent e) {
 				evolution_automate.setEnabled(false);
 				realisation_automate.setEnabled(false);
@@ -249,14 +228,14 @@ public class Automate {
 			
         });
         
-        //Affichage de la fen�tre
+        //Affichage de la fenêtre
         fenetre.pack();
 	}
 	
 	
 	/**
-	 * JPanel repr�sentant l'automate
-	 * @author Th�o
+	 * JPanel représentant l'automate
+	 * @author Théo
 	 *
 	 */
 	class JPanel_Automate extends JPanel {
@@ -298,29 +277,9 @@ public class Automate {
 	
 	//Main qui lance le code
 	public static void main(String[] args) {
-
-		double[] arrNull = {};
-		int[] arr0 = {0,1,1,1,1,1,1,0};
-		int[] arr0i = {1,0,0,0,0,0,0,1};
-		double[] arrP = {0,0.5,1,1,1,1,0.5,0};
-		int[] arrC = {0,0,0,1,1,1,1,0};
-		int[] arrS = {0,1,1,0,1,1,1,0};
-		int[] arrSm = {0,1,1,1,0,1,1,0};
-		
-		Automate automate0 = new Automate(arr0, false, arrNull,"0 - vue en cours");
-		Automate automate0i = new Automate(arr0i, false, arrNull,"1 - inverse de 0 (vue en cours)");
-		Automate automate0p = new Automate(arr0,false, arrP, "2 - vue en cours + proba");
-		Automate automateR = new Automate(arr0,true, arrNull, "3 - random initialisation (regles d'automate 0 vue en cpurs)");
-
-		Automate automateC = new Automate(arrC, false, arrNull,"4 - ressemble au motif de la coquillage");
-		Automate automateCr = new Automate(arrC, true, arrNull,"5 - ressemble au motif de la coquillage + random");
-
-		Automate automateS = new Automate(arrS, false, arrNull,"6 - simples");
-		Automate automateSm = new Automate(arrSm,false, arrNull, "7 - simples (mirroire de 6)");
-
-		
-
-		
+		Automate automate = new Automate(false);
 	}
 
 }
+
+
